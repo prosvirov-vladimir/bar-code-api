@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Detection API</title>
+</head>
+<body>
+    <style>
+        video {
+            border: 2px solid black;
+            width: 60%;
+            max-width: 600px;
+        }
+        canvas {
+            display: none;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid red;
+            background-color: rgb(219, 231, 255);
+        }
+        .output p {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+    </style>
+    <h1>Обнаружение разных типов кодов и их содержимого через камеру на телефоне</h1>
+    <button id="start-camera">Включить камеру</button>
+    <button id="stop-camera" disabled>Выключить камеру</button><br>
+    <video id="camera" autoplay></video>
+    <canvas id="canvas"></canvas>
+    <div class="output" id="output">
+        <p>Пока не обнаружено ни одного кода</p>
+    </div>
+    <script>
+        const video = document.getElementById("camera");
+        const canvas = document.getElementById("canvas");
+        const output = document.getElementById("output");
+        const startButton = document.getElementById("start-camera");
+        const stopButton = document.getElementById("stop-camera");
+
+        let stream = null;
+        let barcodeDetector = null;
+
+        if ("BarcodeDetector" in window) {
+            const supportedFormats = ["code_128", "ean_13", "qr_code", "upc_a"];
+            barcodeDetector = new BarcodeDetector({formats: supportedFormats});
+        } else {
+            alert("Распознование кода не поддерживается в вашем бразуере. Откройте страницу в мобильном хроме");
+        }
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}});
+                video.srcObject = stream;
+                startButton.disabled = true;
+                stopButton.disabled = false;
+            } catch (error) {
+                console.error("Ошибка получения доступа к камере: ", error);
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+
+                startButton.disabled = false;
+                stopButton.disabled = true;
+            }
+        }
+
+        startButton.addEventListener("click", startCamera);
+        stopButton.addEventListener("click", stopCamera);
+    </script>
+</body>
+</html>
