@@ -72,6 +72,35 @@
             }
         }
 
+        async function detectBarcodes() {
+            const ctx = canvas.getContext("2d");
+            if (!barcodeDetector) return;
+
+            function scan() {
+                if (stream) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    barcodeDetector.detect(canvas)
+                        .then(barcodes => {
+                            if (barcodes.length > 0) {
+                                output.innerHTML = barcodes.map(barcode => 
+                                    `<p>Формат: ${barcode.format}, значение: ${barcode.rawValue}</p>`
+                                ).join("");
+                            } else {
+                                output.innerHTML = "Пока не обнаружено не одного кода";
+                            }
+                        })
+                        .catch(err => console.error("Обнаружение баркода привело к ошибке: ", err));
+
+                        requestAnimationFrame(scan);
+                }
+            }
+            scan();
+        }
+
         startButton.addEventListener("click", startCamera);
         stopButton.addEventListener("click", stopCamera);
     </script>
