@@ -57,6 +57,7 @@
                 video.srcObject = stream;
                 startButton.disabled = true;
                 stopButton.disabled = false;
+                detectBarcodes();
             } catch (error) {
                 console.error("Ошибка получения доступа к камере: ", error);
             }
